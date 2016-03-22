@@ -118,9 +118,10 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var person = "CIG Emp";
+      var socket = io();
       myFunction();
 
-      var socket = io();
+      
       $('#btn-chat').on('click', function(){
         socket.emit('chat message', window.person+": "+$('#btn-input').val());
         $('#btn-input').val('');
@@ -131,6 +132,30 @@
         var currentdate = new Date();
         var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
         var liItem = '<li class="left clearfix"><div class="chat-body clearfix"><p>'+msg+'</p><span style="float:right">'+currTime+'</span></div></li>'
+        $('#messages').append($(liItem));
+
+
+        $('#chatWrapper').animate({
+          scrollTop: '10000'
+        }, 1000);
+      });
+
+      socket.on('user joined', function(msg){
+        var currentdate = new Date();
+        var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: green">'+msg+' Joined this thread.</p><span style="float:right">'+currTime+'</span></div></li>'
+        $('#messages').append($(liItem));
+        
+
+        $('#chatWrapper').animate({
+          scrollTop: '10000'
+        }, 1000);
+      });
+
+      socket.on('user left', function(usr){
+        var currentdate = new Date();
+        var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: red">'+usr+' Left this thread.</p><span style="float:right">'+currTime+'</span></div></li>'
         $('#messages').append($(liItem));
         
 
@@ -153,8 +178,17 @@
         if (person != null) {
           self.person = person;
         }
+        socket.emit('user joined', window.person);
 
         $("#btn-input").focus();
+      }
+
+      window.onbeforeunload = function () {
+        notifyLeaving();
+      };
+
+      function notifyLeaving(){
+        socket.emit('user left', window.person);
       }
     </script>
   </body>
