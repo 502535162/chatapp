@@ -41,6 +41,14 @@ io.on('connection', function(socket){
   socket.on('user left', function(msg){
   	io.emit('user left', msg);
   });
+
+  socket.on('user typing', function(msg){
+  	socket.broadcast.emit('user typing', msg);
+  });
+
+  socket.on('user finished typing', function(msg){
+  	socket.broadcast.emit('user finished typing', msg);
+  });
 });
 
 
