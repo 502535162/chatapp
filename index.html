@@ -128,8 +128,11 @@
       });
 
       socket.on('chat message', function(msg){
-        var liItem = '<li class="left clearfix"><div class="chat-body clearfix"><p>'+msg+'</p></div></li>'
+        var currentdate = new Date();
+        var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix"><p>'+msg+'</p><span style="float:right">'+currTime+'</span></div></li>'
         $('#messages').append($(liItem));
+        
 
         $('#chatWrapper').animate({
           scrollTop: '10000'
