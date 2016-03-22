@@ -132,8 +132,10 @@
         var currentdate = new Date();
         var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
         var liItem = '<li class="left clearfix"><div class="chat-body clearfix"><p>'+msg+'</p><span style="float:right">'+currTime+'</span></div></li>'
-        $('#messages').append($(liItem));
 
+        if(window.person === 'duddu' || window.person === 'laddu'){
+          $('#messages').append($(liItem));
+        }
 
         $('#chatWrapper').animate({
           scrollTop: '10000'
@@ -143,8 +145,11 @@
       socket.on('user joined', function(msg){
         var currentdate = new Date();
         var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
-        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: green">'+msg+' Joined this thread.</p><span style="float:right">'+currTime+'</span></div></li>'
-        $('#messages').append($(liItem));
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: green">'+msg+' Joined this thread.</p><span style="float:right">'+currTime+'</span></div></li>';
+
+        if(window.person === 'duddu' || window.person === 'laddu'){
+          $('#messages').append($(liItem));
+        }
         
 
         $('#chatWrapper').animate({
@@ -156,8 +161,9 @@
         var currentdate = new Date();
         var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
         var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: red">'+usr+' Left this thread.</p><span style="float:right">'+currTime+'</span></div></li>'
-        $('#messages').append($(liItem));
-        
+        if(window.person === 'duddu' || window.person === 'laddu'){
+          $('#messages').append($(liItem));
+        }
 
         $('#chatWrapper').animate({
           scrollTop: '10000'
