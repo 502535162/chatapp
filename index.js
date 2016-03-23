@@ -24,14 +24,30 @@ var http = require('http').Server(app);
 
 var io = require('socket.io')(http);
 
+
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function(socket){
   socket.on('chat message', function(msg){
-  	console.log("hello");
     io.emit('chat message', msg);
+  });
+
+  socket.on('user joined', function(msg){
+  	io.emit('user joined', msg);
+  });
+
+  socket.on('user left', function(msg){
+  	io.emit('user left', msg);
+  });
+
+  socket.on('user typing', function(msg){
+  	socket.broadcast.emit('user typing', msg);
+  });
+
+  socket.on('user finished typing', function(msg){
+  	socket.broadcast.emit('user finished typing', msg);
   });
 });
 

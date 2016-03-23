@@ -107,10 +107,19 @@
                                 Send</button>
                         </span>
                     </div>
+                    <div id="userTypingText"></div>
                   </div>
               </div>
           </div>
       </div>
+     <!--  <div class="row">
+          <h1>Active Users</h1>
+          <div class="col-md-5">
+            <ul id="activeUsers">
+              
+            </ul>
+          </div>
+      </div> -->
     </div>
 
 
@@ -118,20 +127,50 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var person = "CIG Emp";
+      var socket = io();
+      var usersTyping = [];
+      var usersAllowed = null; //["duddu", "laddu"]
       myFunction();
 
-      var socket = io();
+      
       $('#btn-chat').on('click', function(){
         socket.emit('chat message', window.person+": "+$('#btn-input').val());
         $('#btn-input').val('');
+        notifyFinishedTyping(window.person);
         return false;
       });
 
+      $('#btn-input').keydown(function(event){    
+        if(event.keyCode==13){
+          $('#btn-chat').trigger('click');
+        }
+      });
+
       socket.on('chat message', function(msg){
+
+        var user = msg.substring(0, msg.indexOf(":"));
+
         var currentdate = new Date();
         var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
         var liItem = '<li class="left clearfix"><div class="chat-body clearfix"><p>'+msg+'</p><span style="float:right">'+currTime+'</span></div></li>'
-        $('#messages').append($(liItem));
+
+        if(isUserAllowed()){
+          $('#messages').append($(liItem));
+        }
+
+        $('#chatWrapper').animate({
+          scrollTop: '10000'
+        }, 1000);
+      });
+
+      socket.on('user joined', function(msg){
+        var currentdate = new Date();
+        var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: green">'+msg+' Joined this thread.</p><span style="float:right">'+currTime+'</span></div></li>';
+
+        if(isUserAllowed()){
+          $('#messages').append($(liItem));
+        }
         
 
         $('#chatWrapper').animate({
@@ -139,13 +178,44 @@
         }, 1000);
       });
 
-      $('#btn-input').keydown(function(event){    
-        if(event.keyCode==13){
-         $('#btn-chat').trigger('click');
+      socket.on('user left', function(usr){
+        var currentdate = new Date();
+        var currTime = currentdate.getHours() + ":"+ currentdate.getMinutes();
+        var liItem = '<li class="left clearfix"><div class="chat-body clearfix" style="color: green"><p style="color: red">'+usr+' Left this thread.</p><span style="float:right">'+currTime+'</span></div></li>'
+        if(isUserAllowed()){
+          $('#messages').append($(liItem));
         }
+
+
+        $('#chatWrapper').animate({
+          scrollTop: '10000'
+        }, 1000);
       });
 
-      
+      socket.on('user typing', function(usr){
+        
+        addUserTyping(usr);
+
+        var message = usersTyping.toString() + " typing...";
+        if(isUserAllowed()){
+          $('#userTypingText').text(message);
+        }
+
+      });
+
+       socket.on('user finished typing', function(usr){
+        
+        finishedUserTyping(usr);
+        var message = "";
+        if(usersTyping.length > 0){
+          message = usersTyping.toString() + " typing...";
+        }
+
+        if(isUserAllowed()){
+            $('#userTypingText').text(message);
+        }
+
+      });
 
       function myFunction() {
         var self = this;
@@ -153,8 +223,71 @@
         if (person != null) {
           self.person = person;
         }
+        socket.emit('user joined', window.person);
 
         $("#btn-input").focus();
+      }
+
+      var activeUsers;
+
+      function appendUser(){
+
+        var liItem = ''
+        $("#activeUsers").append()
+      }
+
+      function addUserTyping(usr){
+        if(usersTyping.indexOf(usr) == -1){
+          usersTyping.push(usr);
+        }
+      }
+
+      function finishedUserTyping(usr){
+        var index = usersTyping.indexOf(usr);
+        if(index !== -1){
+          usersTyping.splice(index, 1);
+        }
+      }
+
+      $("#btn-input").on("keyup", function(event){
+        if(event.keyCode == 13){
+          return;
+        }
+
+        var inputValue = $("#btn-input").val();
+
+        if(inputValue == ""){
+          notifyFinishedTyping(window.person);
+          return;
+        }
+        if(window.usersTyping.indexOf(window.person) == -1){
+          if(inputValue.length >= 1)
+          notifyTyping();
+        }
+      })
+
+      window.onbeforeunload = function () {
+        notifyLeaving();
+        finishedUserTyping(window.person)
+      };
+
+      function notifyTyping(){
+        socket.emit('user typing', window.person);
+      }
+
+      function notifyFinishedTyping(){
+        socket.emit('user finished typing', window.person);
+      }
+
+      function notifyLeaving(){
+        socket.emit('user left', window.person);
+      }
+
+      function isUserAllowed(){
+        if(!usersAllowed || usersAllowed.indexOf(window.person) >= 0)
+        return true;
+
+        return false;
       }
     </script>
   </body>
